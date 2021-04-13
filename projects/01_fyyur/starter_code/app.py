@@ -59,6 +59,13 @@ class Artist(db.Model):
     genres = db.Column(db.String(120))
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
+    website = db.Column(db.String(120))
+    seeking_talent = db.Column(db.Boolean)
+    seeking_description = db.Column(db.Text())
+    # TODO: include shows relationship
+    # shows = db.relationship('Show', backref='list', lazy=True, cascade='all, delete-orphan')
+    def repr(self):
+      return f'<Artist {self.id} {self.name}>'
 
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
