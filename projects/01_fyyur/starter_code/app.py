@@ -131,16 +131,23 @@ def venues():
 
 @app.route('/venues/search', methods=['POST'])
 def search_venues():
-  # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
+  # Done: implement search on artists with partial string search. Ensure it is case-insensitive.
   # seach for Hop should return "The Musical Hop".
   # search for "Music" should return "The Musical Hop" and "Park Square Live Music & Coffee"
+  
+  # As seen in https://stackoverflow.com/questions/3325467/sqlalchemy-equivalent-to-sql-like-statement
+  tag = request.form["search_term"]
+  search = "%{}%".format(tag)
+  venues = db.session.query(Venue.id, Venue.name, db.func.count(Show.venue_id) \
+          .filter(Show.start_time > datetime.utcnow()) \
+          .label("num_upcoming_shows")) \
+          .filter(Venue.name.like(search)) \
+          .outerjoin(Show, Venue.id == Show.venue_id) \
+          .group_by(Venue.id, Venue.name).all()
+
   response={
-    "count": 1,
-    "data": [{
-      "id": 2,
-      "name": "The Dueling Pianos Bar",
-      "num_upcoming_shows": 0,
-    }]
+    "count": len(venues),
+    "data": venues
   }
   return render_template('pages/search_venues.html', results=response, search_term=request.form.get('search_term', ''))
 
