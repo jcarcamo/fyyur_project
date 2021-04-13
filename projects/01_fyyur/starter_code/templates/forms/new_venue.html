@@ -52,6 +52,7 @@
         <label for="seeking_description">Seeking Talent Description</label>
         {{ form.seeking_description(class_ = 'form-control', placeholder='Optional: Describe the talent you are looking', autofocus = true) }}
       </div>
+      {{ form.csrf_token }}
       <input type="submit" value="Create Venue" class="btn btn-primary btn-lg btn-block">
     </form>
   </div>

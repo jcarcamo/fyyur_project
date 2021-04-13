@@ -49,6 +49,7 @@
         {{ form.seeking_description(class_ = 'form-control', placeholder='Optional: Describe the talent you are looking', autofocus = true) }}
       </div>
       {{ form.id( id=form.id.id) }}
+      {{ form.csrf_token }}
       <input type="submit" value="Edit Artist" class="btn btn-primary btn-lg btn-block">
     </form>
   </div>

@@ -1,5 +1,5 @@
 from datetime import datetime
-from flask_wtf import Form
+from flask_wtf import FlaskForm as Form
 from wtforms import StringField, SelectField, SelectMultipleField, DateTimeField, BooleanField, HiddenField
 from wtforms.validators import DataRequired, AnyOf, URL
 
@@ -191,9 +191,6 @@ class ArtistForm(Form):
             ('WI', 'WI'),
             ('WY', 'WY'),
         ]
-    )
-    address = StringField(
-        'address', validators=[DataRequired()]
     )
     phone = StringField(
         # TODO implement validation logic for state

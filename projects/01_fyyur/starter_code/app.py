@@ -11,7 +11,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 import logging
 from logging import Formatter, FileHandler
-from flask_wtf import Form
+from flask_wtf import FlaskForm
 from forms import *
 #----------------------------------------------------------------------------#
 # App Config.
@@ -275,7 +275,7 @@ def create_venue_submission():
       print(sys.exc_info())
   finally:
       db.session.close()
-      
+
   if error:
     # Done: on unsuccessful db insert, flash an error instead.
     # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
@@ -479,15 +479,53 @@ def create_artist_form():
 @app.route('/artists/create', methods=['POST'])
 def create_artist_submission():
   # called upon submitting the new artist listing form
-  # TODO: insert form data as a new Venue record in the db, instead
-  # TODO: modify data to be the data object returned from db insertion
+  # Done: insert form data as a new Artist record in the db, instead
+  # TODO: modify data to be the data object returned from db insertion? Not Sure
+  form = ArtistForm()
+  if not form.validate():
+    flash('An error occurred. Artist ' + form.name.data + ' could not be listed.')
+    print(form.errors)
+    return render_template('forms/new_artist.html', form=form)
+  
+  error = False
+  # Could not figure out how to get a boolean from data, probably get 
+  # the checked property?
+  seeking_talent = False
+  if form.seeking_talent.data == 'y':
+    seeking_talent = True
 
-  # on successful db insert, flash success
-  flash('Artist ' + request.form['name'] + ' was successfully listed!')
-  # TODO: on unsuccessful db insert, flash an error instead.
-  # e.g., flash('An error occurred. Artist ' + data.name + ' could not be listed.')
-  return render_template('pages/home.html')
-
+  newArtist = Artist(
+    name = form.name.data,
+    city = form.city.data,
+    state = form.state.data,
+    phone = form.phone.data,
+    image_link = form.image_link.data,
+    facebook_link = form.facebook_link.data,
+    website = form.website.data,
+    seeking_talent = seeking_talent,
+    seeking_description = form.seeking_description.data
+  )
+  try:        
+      db.session.add(newArtist)
+      db.session.commit()
+  except:
+      db.session.rollback()
+      error=True        
+      print(sys.exc_info())
+  finally:
+      db.session.close()
+      
+  if error:
+    # Done: on unsuccessful db insert, flash an error instead.
+    # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
+    # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
+    flash('An error occurred. Artist ' + form.name.data + ' could not be listed.')
+    return render_template('forms/new_artist.html', form=form)
+  else:
+    # on successful db insert, flash success
+    flash('Artist ' + form.name.data + ' was successfully listed!')
+  return render_template('forms/new_artist.html', form=form)
+  #return render_template('pages/home.html')
 
 #  Shows
 #  ----------------------------------------------------------------
