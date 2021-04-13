@@ -72,7 +72,6 @@ class Show(db.Model):
     start_time = db.Column(db.DateTime())  
     artist_id = db.Column(db.Integer, db.ForeignKey('artists.id'), nullable=False)
     venue_id = db.Column(db.Integer, db.ForeignKey('venues.id'), nullable=False)
-    seeking_description = db.Column(db.Text())
     def repr(self):
         return f'<Show {self.id} {self.description}, Start Time {self.start_time}>, \
           artist {self.artist_id}>, venue  {self.venue_id} '
@@ -109,27 +108,24 @@ def index():
 def venues():
   # TODO: replace with real venues data.
   #       num_shows should be aggregated based on number of upcoming shows per venue.
-  data=[{
-    "city": "San Francisco",
-    "state": "CA",
-    "venues": [{
-      "id": 1,
-      "name": "The Musical Hop",
-      "num_upcoming_shows": 0,
-    }, {
-      "id": 3,
-      "name": "Park Square Live Music & Coffee",
-      "num_upcoming_shows": 1,
-    }]
-  }, {
-    "city": "New York",
-    "state": "NY",
-    "venues": [{
-      "id": 2,
-      "name": "The Dueling Pianos Bar",
-      "num_upcoming_shows": 0,
-    }]
-  }]
+  # import datetime
+  # from app import db, Venue, Show, Artist
+  data = list()
+  for state, city in (db.session.query(Venue.state, Venue.city).distinct(Venue.city) \
+                .group_by(Venue.state, Venue.city).all()):
+    location = dict()
+    location["city"] = city
+    location["state"] = state
+    db.session.query(Show.venue_id, db.func.count(Show.id)) \
+            .outerjoin(Venue, Venue.id == Show.venue_id).group_by(Show.venue_id).all()
+    location["venues"] = db.session.query(Venue.id, Venue.name, \
+                          db.func.count(Show.venue_id) \
+                          .filter(Show.start_time > datetime.utcnow())
+                          .label("num_upcoming_shows")) \
+                          .filter(Venue.city == city) \
+                          .outerjoin(Show, Venue.id == Show.venue_id) \
+                          .group_by(Venue.id, Venue.name).all()
+    data.append(location)                              
   return render_template('pages/venues.html', areas=data);
 
 @app.route('/venues/search', methods=['POST'])
