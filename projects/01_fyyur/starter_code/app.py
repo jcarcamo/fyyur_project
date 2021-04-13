@@ -43,8 +43,7 @@ class Venue(db.Model):
     website = db.Column(db.String(120))
     seeking_talent = db.Column(db.Boolean)
     seeking_description = db.Column(db.Text())
-    # TODO: include shows relationship
-    # shows = db.relationship('Show', backref='list', lazy=True, cascade='all, delete-orphan')
+    shows = db.relationship('shows', backref='venue', lazy=True, cascade='all, delete-orphan')
     def repr(self):
       return f'<Venue {self.id} {self.name}>'
 
@@ -62,8 +61,7 @@ class Artist(db.Model):
     website = db.Column(db.String(120))
     seeking_talent = db.Column(db.Boolean)
     seeking_description = db.Column(db.Text())
-    # TODO: include shows relationship
-    # shows = db.relationship('Show', backref='list', lazy=True, cascade='all, delete-orphan')
+    shows = db.relationship('shows', backref='artist', lazy=True, cascade='all, delete-orphan')
     def repr(self):
       return f'<Artist {self.id} {self.name}>'
 
@@ -74,11 +72,10 @@ class Show(db.Model):
     artist_id = db.Column(db.Integer, db.ForeignKey('artists.id'), nullable=False)
     venue_id = db.Column(db.Integer, db.ForeignKey('venues.id'), nullable=False)
     seeking_description = db.Column(db.Text())
-    # TODO: include shows relationship
-    # shows = db.relationship('Show', backref='list', lazy=True, cascade='all, delete-orphan')
+    shows = db.relationship('Show', backref='list', lazy=True, cascade='all, delete-orphan')
     def repr(self):
         return f'<Show {self.id} {self.description}, Start Time {self.start_time}>, \
-          list {self.artist_id}>, venue_id  {self.venue_id} '
+          artist {self.artist_id}>, venue  {self.venue_id} '
 
 # TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
 
