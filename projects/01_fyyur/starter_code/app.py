@@ -1,7 +1,7 @@
 #----------------------------------------------------------------------------#
 # Imports
 #----------------------------------------------------------------------------#
-
+import sys
 import json
 import dateutil.parser
 import babel
@@ -43,7 +43,7 @@ class Venue(db.Model):
     website = db.Column(db.String(120))
     seeking_talent = db.Column(db.Boolean)
     seeking_description = db.Column(db.Text())
-    shows = db.relationship('shows', backref='venue', lazy=True, cascade='all, delete-orphan')
+    shows = db.relationship('Show', backref='venue', lazy=True, cascade='all, delete-orphan')
     def repr(self):
       return f'<Venue {self.id} {self.name}>'
 
@@ -61,7 +61,7 @@ class Artist(db.Model):
     website = db.Column(db.String(120))
     seeking_talent = db.Column(db.Boolean)
     seeking_description = db.Column(db.Text())
-    shows = db.relationship('shows', backref='artist', lazy=True, cascade='all, delete-orphan')
+    shows = db.relationship('Show', backref='artist', lazy=True, cascade='all, delete-orphan')
     def repr(self):
       return f'<Artist {self.id} {self.name}>'
 
@@ -72,12 +72,11 @@ class Show(db.Model):
     artist_id = db.Column(db.Integer, db.ForeignKey('artists.id'), nullable=False)
     venue_id = db.Column(db.Integer, db.ForeignKey('venues.id'), nullable=False)
     seeking_description = db.Column(db.Text())
-    shows = db.relationship('Show', backref='list', lazy=True, cascade='all, delete-orphan')
     def repr(self):
         return f'<Show {self.id} {self.description}, Start Time {self.start_time}>, \
           artist {self.artist_id}>, venue  {self.venue_id} '
 
-# TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
+# DONE Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
 
 #----------------------------------------------------------------------------#
 # Filters.
@@ -241,14 +240,49 @@ def create_venue_form():
 
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
-  # TODO: insert form data as a new Venue record in the db, instead
-  # TODO: modify data to be the data object returned from db insertion
-
-  # on successful db insert, flash success
-  flash('Venue ' + request.form['name'] + ' was successfully listed!')
-  # TODO: on unsuccessful db insert, flash an error instead.
-  # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
-  # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
+  # Done: insert form data as a new Venue record in the db, instead
+  # TODO: modify data to be the data object returned from db insertion? Not Sure
+  error = False
+  name = request.form['name']
+  city = request.form['city']
+  state = request.form['state']
+  address = request.form['address']
+  phone = request.form['phone']
+  image_link = request.form['image_link']
+  facebook_link = request.form['facebook_link']
+  website = request.form['website']
+  seeking_talent = False
+  if request.form['seeking_talent'] == 'y':
+    seeking_talent = True
+  seeking_description = request.form['seeking_description']
+  newVenue = Venue(
+    name = name,
+    city = city,
+    state = state,
+    address = address,
+    phone = phone,
+    image_link = image_link,
+    facebook_link = facebook_link,
+    website = website,
+    seeking_talent = seeking_talent,
+    seeking_description = seeking_description
+  )
+  try:        
+      db.session.add(newVenue)
+      db.session.commit()
+  except:
+      db.session.rollback()
+      error=True        
+      print(sys.exc_info())
+  finally:
+      db.session.close()
+  if error:
+    # Done: on unsuccessful db insert, flash an error instead.
+    # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
+    # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
+    flash('An error occurred. Venue ' + request.form['name'] + ' could not be listed.')
+  else:
+    flash('Venue ' + request.form['name'] + ' was successfully listed!')
   return render_template('pages/home.html')
 
 @app.route('/venues/<venue_id>', methods=['DELETE'])
