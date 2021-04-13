@@ -43,7 +43,10 @@ class Venue(db.Model):
     website = db.Column(db.String(120))
     seeking_talent = db.Column(db.Boolean)
     seeking_description = db.Column(db.Text())
-    # TODO: implement any missing fields, as a database migration using Flask-Migrate
+    # TODO: include shows relationship
+    # shows = db.relationship('Show', backref='list', lazy=True, cascade='all, delete-orphan')
+    def repr(self):
+      return f'<Venue {self.id} {self.name}>'
 
 class Artist(db.Model):
     __tablename__ = 'Artist'
