@@ -242,30 +242,29 @@ def create_venue_form():
 def create_venue_submission():
   # Done: insert form data as a new Venue record in the db, instead
   # TODO: modify data to be the data object returned from db insertion? Not Sure
+  form = VenueForm()
+  if not form.validate():
+    flash('An error occurred. Venue ' + form.name.data + ' could not be listed.')
+    return render_template('forms/new_venue.html', form=form)
+  
   error = False
-  name = request.form['name']
-  city = request.form['city']
-  state = request.form['state']
-  address = request.form['address']
-  phone = request.form['phone']
-  image_link = request.form['image_link']
-  facebook_link = request.form['facebook_link']
-  website = request.form['website']
+  # Could not figure out how to get a boolean from data, probably get 
+  # the checked property?
   seeking_talent = False
-  if request.form['seeking_talent'] == 'y':
+  if form.seeking_talent.data == 'y':
     seeking_talent = True
-  seeking_description = request.form['seeking_description']
+
   newVenue = Venue(
-    name = name,
-    city = city,
-    state = state,
-    address = address,
-    phone = phone,
-    image_link = image_link,
-    facebook_link = facebook_link,
-    website = website,
+    name = form.name.data,
+    city = form.city.data,
+    state = form.state.data,
+    address = form.address.data,
+    phone = form.phone.data,
+    image_link = form.image_link.data,
+    facebook_link = form.facebook_link.data,
+    website = form.website.data,
     seeking_talent = seeking_talent,
-    seeking_description = seeking_description
+    seeking_description = form.seeking_description.data
   )
   try:        
       db.session.add(newVenue)
@@ -276,13 +275,15 @@ def create_venue_submission():
       print(sys.exc_info())
   finally:
       db.session.close()
+      
   if error:
     # Done: on unsuccessful db insert, flash an error instead.
     # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
     # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
-    flash('An error occurred. Venue ' + request.form['name'] + ' could not be listed.')
+    flash('An error occurred. Venue ' + form.name.data + ' could not be listed.')
+    return render_template('forms/new_venue.html', form=form)
   else:
-    flash('Venue ' + request.form['name'] + ' was successfully listed!')
+    flash('Venue ' + form.name.data + ' was successfully listed!')
   return render_template('pages/home.html')
 
 @app.route('/venues/<venue_id>', methods=['DELETE'])
