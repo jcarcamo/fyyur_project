@@ -204,18 +204,13 @@ def create_venue_form():
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
   # Done: insert form data as a new Venue record in the db, instead
-  # TODO: modify data to be the data object returned from db insertion? Not Sure
+  # Done: modify data to be the data object returned from db insertion? Not Sure
   form = VenueForm()
   if not form.validate():
     flash('An error occurred. Venue ' + form.name.data + ' could not be listed.')
     return render_template('forms/new_venue.html', form=form)
   
-  error = False
-  # Could not figure out how to get a boolean from data, probably get 
-  # the checked property?
-  seeking_talent = False
-  if form.seeking_talent.data == 'y':
-    seeking_talent = True
+  error = False 
 
   newVenue = Venue(
     name = form.name.data,
@@ -227,12 +222,16 @@ def create_venue_submission():
     image_link = form.image_link.data,
     facebook_link = form.facebook_link.data,
     website = form.website.data,
-    seeking_talent = seeking_talent,
+    seeking_talent =  form.seeking_talent.data,
     seeking_description = form.seeking_description.data
   )
+  
+  venue_id = 1
+
   try:        
       db.session.add(newVenue)
       db.session.commit()
+      venue_id = newVenue.id
   except:
       db.session.rollback()
       error=True        
@@ -248,8 +247,10 @@ def create_venue_submission():
     return render_template('forms/new_venue.html', form=form)
   else:
     flash('Venue ' + form.name.data + ' was successfully listed!')
-  return render_template('pages/home.html')
+  return redirect(url_for('show_venue', venue_id=venue_id))
 
+#  Delete Venue
+#  ----------------------------------------------------------------
 @app.route('/venues/<venue_id>', methods=['DELETE'])
 def delete_venue(venue_id):
   # TODO: Complete this endpoint for taking a venue_id, and using
@@ -258,6 +259,67 @@ def delete_venue(venue_id):
   # BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
   # clicking that button delete it from the db then redirect the user to the homepage
   return None
+
+
+#  Update Venue
+#  ----------------------------------------------------------------
+@app.route('/venues/<int:venue_id>/edit', methods=['GET'])
+def edit_venue(venue_id):
+  venue = Venue.query.get(venue_id)
+  form = VenueForm(obj=venue) 
+
+  # Since generes are stored with curly braces, 
+  # I remove them and make a list from them 
+  # This is needed to properly display them in edit_artist
+  genres = venue.genres[1:-1].split(",")
+  form.genres.data = genres
+  
+  # Done: populate form with fields from artist with ID <artist_id>
+  return render_template('forms/edit_venue.html', form=form, venue=venue)
+
+@app.route('/venues/<int:venue_id>/edit', methods=['POST'])
+def edit_venue_submission(venue_id):
+  # Done: take values from the form submitted, and update existing
+  # venue record with ID <venue_id> using the new attributes
+  venue = Venue.query.get(venue_id)
+  form = VenueForm()
+  if not form.validate():
+    flash('An error occurred. Venue ' + form.name.data + ' could not be updated.')
+    return render_template('forms/edit_venue.html', form=form, venue=venue)
+  
+  error = False 
+
+  venue.name = form.name.data
+  venue.city = form.city.data
+  venue.state = form.state.data
+  venue.address = form.address.data
+  venue.genres = form.genres.data
+  venue.phone = form.phone.data
+  venue.image_link = form.image_link.data
+  venue.facebook_link = form.facebook_link.data
+  venue.website = form.website.data
+  venue.seeking_talent =  form.seeking_talent.data
+  venue.seeking_description = form.seeking_description.data
+  
+  try:        
+      db.session.commit()
+  except:
+      db.session.rollback()
+      error=True        
+      print(sys.exc_info())
+  finally:
+      db.session.close()
+
+  if error:
+    # Done: on unsuccessful db insert, flash an error instead.
+    # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
+    # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
+    flash('An error occurred. Venue ' + form.name.data + ' could not be updated.')
+    return render_template('forms/edit_venue.html', form=form, venue=venue)
+  else:
+    flash('Venue ' + form.name.data + ' was successfully updated!')
+
+  return redirect(url_for('show_venue', venue_id=venue_id))
 
 #  Artists
 #  ----------------------------------------------------------------
@@ -269,7 +331,7 @@ def artists():
 
 @app.route('/artists/search', methods=['POST'])
 def search_artists():
-  # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
+  # Done: implement search on artists with partial string search. Ensure it is case-insensitive.
   # seach for "A" should return "Guns N Petals", "Matt Quevado", and "The Wild Sax Band".
   # search for "band" should return "The Wild Sax Band".
 
@@ -328,75 +390,65 @@ def show_artist(artist_id):
   
   return render_template('pages/show_artist.html', artist=data)
 
-#  Update
+#  Update Artist
 #  ----------------------------------------------------------------
 @app.route('/artists/<int:artist_id>/edit', methods=['GET'])
 def edit_artist(artist_id):
   artist = Artist.query.get(artist_id)
-  form = ArtistForm(obj=artist)
-  form.state.data = artist.state
+  form = ArtistForm(obj=artist) 
+
+  # Since generes are stored with curly braces, 
+  # I remove them and make a list from them 
+  # This is needed to properly display them in edit_artist
   genres = artist.genres[1:-1].split(",")
   form.genres.data = genres
-  #form.populate_obj(artist)
-  """
-  artist={
-    "id": 4,
-    "name": "Guns N Petals",
-    "genres": ["Rock n Roll"],
-    "city": "San Francisco",
-    "state": "CA",
-    "phone": "326-123-5000",
-    "website": "https://www.gunsnpetalsband.com",
-    "facebook_link": "https://www.facebook.com/GunsNPetals",
-    "seeking_venue": True,
-    "seeking_description": "Looking for shows to perform at in the San Francisco Bay Area!",
-    "image_link": "https://images.unsplash.com/photo-1549213783-8284d0336c4f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=80"
-  }
-  """
-  # TODO: populate form with fields from artist with ID <artist_id>
-  return render_template('forms/edit_artist.html', form=form, artist=artist, genres=genres)
+  
+  # Done: populate form with fields from artist with ID <artist_id>
+  return render_template('forms/edit_artist.html', form=form, artist=artist)
 
 @app.route('/artists/<int:artist_id>/edit', methods=['POST'])
 def edit_artist_submission(artist_id):
-  # TODO: take values from the form submitted, and update existing
+  # Done: take values from the form submitted, and update existing
   # artist record with ID <artist_id> using the new attributes
+  artist = Artist.query.get(artist_id)
+  form = ArtistForm()
+  if not form.validate():
+    flash('An error occurred. Artist ' + form.name.data + ' could not be listed.')
+    print(form.errors)
+    return render_template('forms/edit_artist.html', form=form, artist=artist)
+  
+  error = False
 
+  artist.name = form.name.data
+  artist.city = form.city.data
+  artist.state = form.state.data
+  artist.phone = form.phone.data
+  artist.genres = form.genres.data
+  artist.image_link = form.image_link.data
+  artist.facebook_link = form.facebook_link.data
+  artist.website = form.website.data
+  artist.seeking_venue = form.seeking_venue.data
+  artist.seeking_description = form.seeking_description.data
+
+  try:        
+      db.session.commit()
+  except:
+      db.session.rollback()
+      error=True        
+      print(sys.exc_info())
+  finally:
+      db.session.close()
+      
+  if error:
+    # Done: on unsuccessful db insert, flash an error instead.
+    # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
+    # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
+    flash('An error occurred. Artist ' + form.name.data + ' could not be updated.')
+    return render_template('forms/edit_artist.html', form=form, artist=artist)
+  else:
+    # on successful db insert, flash success
+    flash('Artist ' + form.name.data + ' was successfully updated!')
   return redirect(url_for('show_artist', artist_id=artist_id))
-
-@app.route('/venues/<int:venue_id>/edit', methods=['GET'])
-def edit_venue(venue_id):
-  form = VenueForm()
-  venue={
-    "id": 1,
-    "name": "The Musical Hop",
-    "genres": ["Jazz", "Reggae", "Swing", "Classical", "Folk"],
-    "address": "1015 Folsom Street",
-    "city": "San Francisco",
-    "state": "CA",
-    "phone": "123-123-1234",
-    "website": "https://www.themusicalhop.com",
-    "facebook_link": "https://www.facebook.com/TheMusicalHop",
-    "seeking_talent": True,
-    "seeking_description": "We are on the lookout for a local artist to play every two weeks. Please call us.",
-    "image_link": "https://images.unsplash.com/photo-1543900694-133f37abaaa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=60"
-  }
-  # TODO: populate form with values from venue with ID <venue_id>
-  for key, value in venue.items():
-    form[key].data = value
-  """
-  form.name.data = venue["name"]
-  form.genres.data = venue["genres"]
-  form.address.data = venue["address"]
-  form.city.data = venue["city"]
-  form.state.data
-  """
-  return render_template('forms/edit_venue.html', form=form, venue=venue)
-
-@app.route('/venues/<int:venue_id>/edit', methods=['POST'])
-def edit_venue_submission(venue_id):
-  # TODO: take values from the form submitted, and update existing
-  # venue record with ID <venue_id> using the new attributes
-  return redirect(url_for('show_venue', venue_id=venue_id))
 
 #  Create Artist
 #  ----------------------------------------------------------------
@@ -418,11 +470,6 @@ def create_artist_submission():
     return render_template('forms/new_artist.html', form=form)
   
   error = False
-  # Could not figure out how to get a boolean from data, probably get 
-  # the checked property?
-  seeking_talent = False
-  if form.seeking_talent.data == 'y':
-    seeking_talent = True
 
   newArtist = Artist(
     name = form.name.data,
@@ -433,12 +480,14 @@ def create_artist_submission():
     image_link = form.image_link.data,
     facebook_link = form.facebook_link.data,
     website = form.website.data,
-    seeking_talent = seeking_talent,
+    seeking_venue = form.seeking_venue.data,
     seeking_description = form.seeking_description.data
   )
+  artist_id = 1
   try:        
       db.session.add(newArtist)
       db.session.commit()
+      artist_id = newArtist.id
   except:
       db.session.rollback()
       error=True        
@@ -455,7 +504,7 @@ def create_artist_submission():
   else:
     # on successful db insert, flash success
     flash('Artist ' + form.name.data + ' was successfully listed!')
-  return render_template('forms/new_artist.html', form=form)
+  return redirect(url_for('show_artist', artist_id=artist_id))
   #return render_template('pages/home.html')
 
 #  Shows

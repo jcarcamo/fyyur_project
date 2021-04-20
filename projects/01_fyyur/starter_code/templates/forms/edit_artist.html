@@ -50,23 +50,7 @@
       </div>
       {{ form.id( id=form.id.id) }}
       {{ form.csrf_token }}
-      <input type="hidden" id="hidden_state" value="{{ artist.state }}" />
-      <input type="hidden" id="hidden_genres" value="{{ genres }}" />
       <input type="submit" value="Edit Artist" class="btn btn-primary btn-lg btn-block">
     </form>
   </div>
-  <script>
-    
-    const state_select = document.getElementById("state");
-    const genres_select = document.getElementById("genres");
-
-    const hidden_state_val = document.getElementById("hidden_state").value; 
-    const hidden_genres = document.getElementById("hidden_genres").value.slice(1,-1).split(",");
-    
-    state_select.value = hidden_state_val;
-    for(let genre of hidden_genres){
-      genres_select.value = genre;
-    }
-
-  </script>
 {% endblock %}
