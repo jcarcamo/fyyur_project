@@ -254,7 +254,7 @@ def create_venue_submission():
 #  ----------------------------------------------------------------
 @app.route('/venues/<venue_id>', methods=['DELETE'])
 def delete_venue(venue_id):
-  # TODO: Complete this endpoint for taking a venue_id, and using
+  # Done: Complete this endpoint for taking a venue_id, and using
   # SQLAlchemy ORM to delete a record. Handle cases where the session commit could fail.
 
   # BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
@@ -504,7 +504,7 @@ def create_artist_form():
 def create_artist_submission():
   # called upon submitting the new artist listing form
   # Done: insert form data as a new Artist record in the db, instead
-  # TODO: modify data to be the data object returned from db insertion? Not Sure
+  # Done: modify data to be the data object returned from db insertion? Not Sure
   form = ArtistForm()
   if not form.validate():
     flash('An error occurred. Artist ' + form.name.data + ' could not be listed.')
