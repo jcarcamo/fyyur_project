@@ -17,7 +17,8 @@
       <div class="form-group">
           <label for="start_time">Start Time</label>
           {{ form.start_time(class_ = 'form-control', placeholder='YYYY-MM-DD HH:MM', autofocus = true) }}
-        </div>
+      </div>
+      {{ form.csrf_token }}
       <input type="submit" value="Create Show" class="btn btn-primary btn-lg btn-block">
     </form>
   </div>
