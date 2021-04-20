@@ -3,6 +3,8 @@
 __pycache__
 venv
 
+stack.yml
+
 # OS generated files #
 ######################
 .DS_Store
