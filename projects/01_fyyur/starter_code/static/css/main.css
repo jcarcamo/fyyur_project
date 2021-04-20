@@ -209,3 +209,9 @@ h2.monospace {
 .subtitle {
   opacity: 0.5;
 }
+
+/* https://stackoverflow.com/questions/10989238/center-image-horizontally-within-a-div */
+.image {
+  display: flex;
+  justify-content: center;
+}

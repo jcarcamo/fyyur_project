@@ -8,6 +8,7 @@
 		</h1>
 		<p class="subtitle">
 			ID: {{ artist.id }}
+			<input type="hidden" id="artist-id" name="artist-id" value="{{artist.id}}" />
 		</p>
 		<div class="genres">
 			{% for genre in artist.genres %}
@@ -40,7 +41,19 @@
 		{% endif %}
 	</div>
 	<div class="col-sm-6">
-		<img src="{{ artist.image_link }}" alt="Venue Image" />
+		<div class="image">
+			<img src="{{ artist.image_link }}" alt="Venue Image" />
+		</div>
+		<div class="btn-group btn-group-justified actions">
+			<div class="btn-group" role="group">
+				<a href="{{artist.id}}/edit">
+					<button type="button" class="btn btn-warning">Edit</button>
+				</a>
+			</div>
+			<div class="btn-group" role="group">
+				<button id="delete-artist-btn" type="button" class="btn btn-danger">Delete</button>
+			</div>
+		</div>
 	</div>
 </div>
 <section>
@@ -72,5 +85,11 @@
 	</div>
 </section>
 
+<script type="application/javascript">
+	const deleteArtistBtn = document.getElementById("delete-artist-btn");
+	const artistId = document.getElementById("artist-id").value;
+	
+	deleteArtistBtn.onclick = () => { deleteFetchWrapper('/artists/'+ artistId, "/artists"); };
+</script>
 {% endblock %}
 
