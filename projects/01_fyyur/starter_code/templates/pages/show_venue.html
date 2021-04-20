@@ -8,6 +8,7 @@
 		</h1>
 		<p class="subtitle">
 			ID: {{ venue.id }}
+			<input type="hidden" id="venue-id" name="venue-id" value="{{venue.id}}" />
 		</p>
 		<div class="genres">
 			{% for genre in venue.genres %}
@@ -43,7 +44,19 @@
 		{% endif %}
 	</div>
 	<div class="col-sm-6">
-		<img src="{{ venue.image_link }}" alt="Venue Image" />
+		<div class="image">
+			<img src="{{ venue.image_link }}" alt="Venue Image" />
+		</div>
+		<div class="btn-group btn-group-justified actions">
+			<div class="btn-group" role="group">
+				<a href="{{venue.id}}/edit">
+					<button type="button" class="btn btn-primary">Edit</button>
+				</a>
+			</div>
+			<div class="btn-group" role="group">
+				<button id="delete-venue-btn" type="button" class="btn btn-danger">Delete</button>
+			</div>
+		</div>
 	</div>
 </div>
 <section>
@@ -75,5 +88,11 @@
 	</div>
 </section>
 
+<script type="application/javascript">
+	const deleteVenueBtn = document.getElementById("delete-venue-btn");
+	const venueId = document.getElementById("venue-id").value;
+	
+	deleteVenueBtn.onclick = () => { deleteFetchWrapper('/venues/'+ venueId, "/venues"); };
+</script>
 {% endblock %}
 

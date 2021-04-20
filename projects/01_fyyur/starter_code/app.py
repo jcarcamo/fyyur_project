@@ -259,7 +259,22 @@ def delete_venue(venue_id):
 
   # BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
   # clicking that button delete it from the db then redirect the user to the homepage
-  return None
+  venue = Venue.query.get(venue_id)
+  error = False
+  try:        
+      db.session.delete(venue)
+      db.session.commit()
+  except:
+      db.session.rollback()
+      error=True        
+      print(sys.exc_info())
+  finally:
+      db.session.close()
+      
+  if error:
+    abort(422)
+
+  return jsonify({'status': "success"})
 
 
 #  Update Venue
@@ -395,10 +410,10 @@ def show_artist(artist_id):
 #  ----------------------------------------------------------------
 @app.route('/artists/<int:artist_id>', methods=['DELETE'])
 def delete_artist(artist_id):
-  # TODO: Complete this endpoint for taking a venue_id, and using
+  # Done: Complete this endpoint for taking a venue_id, and using
   # SQLAlchemy ORM to delete a record. Handle cases where the session commit could fail.
 
-  # BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
+  # BONUS CHALLENGE: Implement a button to delete an Artist on a Artist Page, have it so that
   # clicking that button delete it from the db then redirect the user to the homepage
   artist = Artist.query.get(artist_id)
   error = False
