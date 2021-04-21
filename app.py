@@ -142,7 +142,7 @@ def search_venues():
   venues = db.session.query(Venue.id, Venue.name, db.func.count(Show.venue_id) \
           .filter(Show.start_time > datetime.utcnow()) \
           .label("num_upcoming_shows")) \
-          .filter(Venue.name.like(search)) \
+          .filter(Venue.name.ilike(search)) \
           .join(Show, Venue.id == Show.venue_id) \
           .group_by(Venue.id, Venue.name).all()
 
@@ -361,7 +361,7 @@ def search_artists():
   artists = db.session.query(Artist.id, Artist.name, db.func.count(Show.artist_id) \
           .filter(Show.start_time > datetime.utcnow()) \
           .label("num_upcoming_shows")) \
-          .filter(Artist.name.like(search)) \
+          .filter(Artist.name.ilike(search)) \
           .join(Show, Artist.id == Show.artist_id) \
           .group_by(Artist.id, Artist.name).all()
 
