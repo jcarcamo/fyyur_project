@@ -125,7 +125,7 @@ def venues():
                           .filter(Show.start_time > datetime.utcnow()) \
                           .label("num_upcoming_shows")) \
                           .filter(Venue.city == city) \
-                          .join(Show, Venue.id == Show.venue_id) \
+                          .outerjoin(Show, Venue.id == Show.venue_id) \
                           .group_by(Venue.id, Venue.name).all()
     data.append(location)                              
   return render_template('pages/venues.html', areas=data);
