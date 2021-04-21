@@ -143,7 +143,7 @@ def search_venues():
           .filter(Show.start_time > datetime.utcnow()) \
           .label("num_upcoming_shows")) \
           .filter(Venue.name.ilike(search)) \
-          .join(Show, Venue.id == Show.venue_id) \
+          .outerjoin(Show, Venue.id == Show.venue_id) \
           .group_by(Venue.id, Venue.name).all()
 
   response={
@@ -362,7 +362,7 @@ def search_artists():
           .filter(Show.start_time > datetime.utcnow()) \
           .label("num_upcoming_shows")) \
           .filter(Artist.name.ilike(search)) \
-          .join(Show, Artist.id == Show.artist_id) \
+          .outerjoin(Show, Artist.id == Show.artist_id) \
           .group_by(Artist.id, Artist.name).all()
 
   response={
