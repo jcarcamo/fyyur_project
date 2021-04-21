@@ -159,6 +159,7 @@ def show_venue(venue_id):
 
   # from datetime import datetime
   # from app import db, Venue, Show, Artist
+  check_venue_exist(venue_id)
   past_shows =  db.session.query(Show.artist_id, Artist.name.label("artist_name"), \
                     Artist.image_link.label("artist_image_link"), \
                     Show.start_time) \
@@ -259,6 +260,7 @@ def delete_venue(venue_id):
 
   # BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
   # clicking that button delete it from the db then redirect the user to the homepage
+  check_venue_exist(venue_id)
   venue = Venue.query.get(venue_id)
   error = False
   try:        
@@ -281,6 +283,7 @@ def delete_venue(venue_id):
 #  ----------------------------------------------------------------
 @app.route('/venues/<int:venue_id>/edit', methods=['GET'])
 def edit_venue(venue_id):
+  check_venue_exist(venue_id)
   venue = Venue.query.get(venue_id)
   form = VenueForm(obj=venue) 
 
@@ -295,6 +298,7 @@ def edit_venue(venue_id):
 
 @app.route('/venues/<int:venue_id>/edit', methods=['POST'])
 def edit_venue_submission(venue_id):
+  check_venue_exist(venue_id)
   # Done: take values from the form submitted, and update existing
   # venue record with ID <venue_id> using the new attributes
   venue = Venue.query.get(venue_id)
@@ -369,6 +373,7 @@ def search_artists():
 
 @app.route('/artists/<int:artist_id>')
 def show_artist(artist_id):
+  check_artist_exist(artist_id)
   # shows the artist page with the given artist_id
   # Done: replace with real venue data from the venues table, using venue_id
   past_shows =  db.session.query(Show.venue_id, Venue.name.label("venue_name"), \
@@ -410,6 +415,7 @@ def show_artist(artist_id):
 #  ----------------------------------------------------------------
 @app.route('/artists/<int:artist_id>', methods=['DELETE'])
 def delete_artist(artist_id):
+  check_artist_exist(artist_id)
   # Done: Complete this endpoint for taking a venue_id, and using
   # SQLAlchemy ORM to delete a record. Handle cases where the session commit could fail.
 
@@ -436,6 +442,7 @@ def delete_artist(artist_id):
 #  ----------------------------------------------------------------
 @app.route('/artists/<int:artist_id>/edit', methods=['GET'])
 def edit_artist(artist_id):
+  check_artist_exist(artist_id)
   artist = Artist.query.get(artist_id)
   form = ArtistForm(obj=artist) 
 
@@ -450,6 +457,7 @@ def edit_artist(artist_id):
 
 @app.route('/artists/<int:artist_id>/edit', methods=['POST'])
 def edit_artist_submission(artist_id):
+  check_artist_exist(artist_id)
   # Done: take values from the form submitted, and update existing
   # artist record with ID <artist_id> using the new attributes
   artist = Artist.query.get(artist_id)
@@ -633,6 +641,19 @@ if not app.debug:
     file_handler.setLevel(logging.INFO)
     app.logger.addHandler(file_handler)
     app.logger.info('errors')
+
+#----------------------------------------------------------------------------#
+# Utils.
+#----------------------------------------------------------------------------#
+def check_venue_exist(venue_id):
+  venue_exists = db.session.query(Venue.id).filter_by(id=venue_id).first() is not None
+  if not venue_exists:
+    abort(404)
+
+def check_artist_exist(artist_id):
+  artist_exists = db.session.query(Artist.id).filter_by(id=artist_id).first() is not None
+  if not artist_exists:
+    abort(404)
 
 #----------------------------------------------------------------------------#
 # Launch.
